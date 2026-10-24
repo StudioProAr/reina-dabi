@@ -48,14 +48,14 @@ h1,h2,h3{font-family:"Playfair Display",serif;line-height:1.2;color:var(--bordo)
 header{position:sticky;top:0;z-index:20;background:rgba(255,248,244,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--rosa-suave)}
 .nav{display:flex;align-items:center;justify-content:space-between;padding:.6rem 0}
 .marca{display:flex;align-items:center;gap:.6rem;text-decoration:none}
-.marca img{width:44px;height:44px;border-radius:50%;object-fit:cover;background:#fff;border:2px solid var(--rosa-suave)}
+.marca img{height:40px;width:auto}
 .marca span{font-family:"Playfair Display",serif;font-weight:700;color:var(--bordo);font-size:1.15rem}
 .nav .btn{padding:.55rem 1rem;font-size:.9rem}
 
 /* Hero */
 .hero{padding:3rem 0 2.5rem;background:radial-gradient(circle at 85% 10%,var(--rosa-suave),transparent 55%)}
 .hero-grid{display:grid;gap:2rem;align-items:center}
-.hero-logo{width:180px;margin-bottom:.5rem;border-radius:16px}
+.hero-logo{width:230px;max-width:70vw;height:auto;margin-bottom:.5rem}
 .hero h1{font-size:clamp(2rem,6vw,3.2rem)}
 .hero .script{font-size:clamp(1.8rem,5vw,2.5rem);display:block;margin:.3rem 0 1rem}
 .hero p{color:var(--gris);font-size:1.1rem;max-width:34rem}
@@ -224,7 +224,7 @@ footer{padding-bottom:calc(6rem + env(safe-area-inset-bottom))}
 <div class="banner" id="banner" hidden></div>
 <header>
   <div class="contenedor nav">
-    <a class="marca" href="#inicio"><img src="img/logo.jpg" alt="Logo Reina Dabi"><span>Reina Dabi</span></a>
+    <a class="marca" href="#inicio"><img src="img/marca.png" alt="Logo Reina Dabi" width="62" height="40"><span>Reina Dabi</span></a>
     <a class="btn btn-wa" data-wa="encabezado" href="#" target="_blank" rel="noopener">Pedí tu ramo</a>
   </div>
 </header>
@@ -233,7 +233,7 @@ footer{padding-bottom:calc(6rem + env(safe-area-inset-bottom))}
   <section class="hero">
     <div class="contenedor hero-grid">
       <div>
-        <img class="hero-logo" src="img/logo.jpg" alt="Reina Dabi">
+        <img class="hero-logo" src="img/logo-completo.png" alt="Reina Dabi, detalles que duran para siempre" width="600" height="562">
         <h1>Ramos de flores eternas</h1>
         <span class="script">Detalles que duran para siempre</span>
         <p>Rosas de satén hechas a mano, una por una, en San Fernando. Personalizamos cada ramo con cintas con mensaje, mariposas, perlas y coronas.</p>
@@ -412,7 +412,7 @@ footer{padding-bottom:calc(6rem + env(safe-area-inset-bottom))}
 
 <footer>
   <div class="contenedor">
-    <a class="marca" href="#inicio"><img src="img/logo.jpg" alt=""><span>Reina Dabi</span></a>
+    <a class="marca" href="#inicio"><img src="img/marca.png" alt="" width="62" height="40"><span>Reina Dabi</span></a>
     <p>Ramos de flores eternas · San Fernando, Buenos Aires · Hacemos envíos</p>
     <p>WhatsApp <a data-wa="pie" href="#" target="_blank" rel="noopener">11 6650-4492</a> · Instagram <a href="https://www.instagram.com/lareina.dabi/" target="_blank" rel="noopener">@lareina.dabi</a></p>
   </div>

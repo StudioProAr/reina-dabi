@@ -20,6 +20,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 input[type=email],input[type=password],input[type=text]{width:100%;font:inherit;padding:.65rem .8rem;border:1.5px solid var(--rosa-suave);border-radius:10px;background:var(--crema)}
 label{font-weight:700;color:var(--bordo);display:block;margin:.8rem 0 .3rem}
 .top{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:1rem}
+.con-logo{display:flex;align-items:center;gap:.6rem;margin:0}.con-logo img{height:44px;width:auto}
 .atajos{display:flex;gap:.5rem;flex-wrap:wrap;margin:-.25rem 0 1rem}
 .atajos a{display:inline-flex;align-items:center;min-height:40px;padding:0 .9rem;border-radius:999px;background:var(--rosa-suave);color:var(--bordo);font-weight:700;text-decoration:none}
 .rol{font-size:.85rem;color:var(--gris)}
@@ -55,7 +56,7 @@ td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
 </head>
 <body>
 <div class="cont">
-  <div class="top"><h1>Panel Reina Dabi</h1><div id="sesion" hidden><span class="rol" id="rol"></span> <button class="sec" id="salir">Salir</button></div></div>
+  <div class="top"><h1 class="con-logo"><img src="img/marca.png" alt="" width="68" height="44">Panel Reina Dabi</h1><div id="sesion" hidden><span class="rol" id="rol"></span> <button class="sec" id="salir">Salir</button></div></div>
   <nav class="atajos" aria-label="Ir a"><a href="https://javiaguilar1.github.io/Rosas-Eternas/">← App de pedidos</a><a href="./">🌹 Ver la página</a></nav>
 
   <div class="card" id="aviso-config" hidden>
