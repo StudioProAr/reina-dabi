@@ -173,10 +173,11 @@ textarea{resize:vertical;min-height:70px}
 .banner-pista{display:inline-flex;animation:banner-pasa var(--dur,20s) linear infinite;will-change:transform}
 .banner-item{display:inline-flex;align-items:center;gap:.6rem;padding:0 2rem}
 .banner-item a{color:var(--bordo);background:#fff;border-radius:999px;padding:.2rem .8rem;text-decoration:none;font-size:.85rem}
-.banner:hover .banner-pista,.banner:focus-within .banner-pista{animation-play-state:paused}
+@media (hover:hover) and (pointer:fine){.banner:hover .banner-pista{animation-play-state:paused}}
+.banner:has(:focus-visible) .banner-pista{animation-play-state:paused}
 @keyframes banner-pasa{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 @keyframes banner-fondo{to{background-position:200% 0}}
-@media (prefers-reduced-motion:reduce){.banner,.banner-pista{animation:none}.banner{white-space:normal;text-align:center;padding:.65rem 1rem}.banner-pista{display:block}.banner-item[aria-hidden]{display:none}}
+@media (prefers-reduced-motion:reduce){.banner{animation:none}.banner-pista{animation-duration:calc(var(--dur,20s) * 2)}}
 .nota-fecha{margin-top:.45rem;font-size:.9rem;font-weight:600;color:var(--bordo);background:var(--rosa-suave);border-radius:10px;padding:.5rem .7rem}
 /* Por qué */
 .porque{display:grid;gap:1rem}
