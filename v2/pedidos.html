@@ -1,0 +1,644 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reina Dabi — Tablero de pedidos</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="manifest" href="pedidos.webmanifest">
+<meta name="theme-color" content="#8E1E48">
+<link rel="icon" href="../img/logo.jpg" type="image/jpeg">
+<link rel="apple-touch-icon" href="../img/logo.jpg">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Reina Dabi">
+<style>
+:root{
+  --bg:#FBF6F3; --card:#FFFFFF; --line:#EADFDA; --ink:#2A1B20; --muted:#6E5D63;
+  --accent:#8E1E48; --accent-soft:#F8DCE7; --ok:#0F5A52; --warn:#7A4B00; --bad:#8F2A12;
+  --gold:#C08A2E; --gold-bright:#F0C24B;
+  --serif:'Iowan Old Style','Palatino Linotype',Palatino,Georgia,serif;
+  --sans:'Segoe UI',system-ui,-apple-system,'Helvetica Neue',sans-serif;
+}
+*{box-sizing:border-box}
+html,body{overflow-x:hidden}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.4}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--warn);outline-offset:2px}
+.wrap{max-width:1280px;margin:0 auto;padding:28px 24px 48px}
+header{display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between;align-items:center;margin-bottom:20px;border-bottom:2px solid var(--accent-soft);padding-bottom:18px}
+.brand{display:flex;align-items:center;gap:14px}
+.brand img{height:64px;width:auto;flex:none}
+h1{font-family:var(--serif);font-size:34px;line-height:1;margin:0;color:var(--accent);font-weight:700}
+.sub{font-size:14px;color:var(--muted);margin-top:4px}
+.tagline{font-family:var(--serif);font-style:italic;font-size:13px;color:var(--gold);margin-top:2px}
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.pill{height:44px;padding:0 16px;border-radius:999px;border:1px solid #DCCBC4;background:#fff;font-weight:600}
+.btn{height:44px;padding:0 20px;border-radius:999px;border:none;background:var(--accent);color:#fff;font-weight:600}
+.btn.ghost{background:#fff;color:var(--ink);border:1px solid #DCCBC4}
+.viewtabs{display:flex;gap:8px;margin-bottom:20px}
+.login-wrap{max-width:380px;margin:80px auto}
+.viewtab{height:42px;padding:0 20px;border-radius:999px;border:1px solid #DCCBC4;background:#fff;font-weight:700;font-size:15px}
+.viewtab[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 0 0 2px var(--gold-bright)}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:32px;align-items:start}
+.layout>*{min-width:0}
+@media (max-width:1000px){.layout{grid-template-columns:minmax(0,1fr)}}
+.kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-bottom:20px}
+@media (max-width:760px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.kpi{background:var(--card);border:1px solid var(--line);border-top:3px solid var(--gold);border-radius:14px;padding:14px 16px}
+.kpi .l{font-size:13px;color:var(--muted)}
+.kpi .v{font-family:var(--serif);font-size:26px;font-weight:700;margin:4px 0 2px}
+.kpi .n{font-size:12px;color:var(--muted)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px}
+.card h2{font-family:var(--serif);font-size:22px;margin:0;color:var(--accent)}
+.head{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:center;padding:18px 20px 12px}
+.tabs{display:flex;gap:6px}
+.tab,.mtab{height:36px;padding:0 14px;border-radius:999px;border:1px solid #DCCBC4;background:#fff;font-weight:600;font-size:14px}
+.tab[aria-pressed="true"],.mtab[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+select.mini{height:36px;border:1px solid #DCCBC4;border-radius:10px;padding:0 10px;background:#fff}
+.scroll{overflow-x:auto}
+.row{display:grid;grid-template-columns:120px minmax(150px,1fr) 118px 84px 84px 84px 132px 80px;gap:10px;padding:12px 20px;align-items:center;border-top:1px solid #F0E6E1;min-width:900px}
+.c-del{display:flex;gap:6px}
+.row.th{background:#F7EFEB;font-size:13px;font-weight:600;color:#5F4E54;border-top:none}
+.row.tot{background:var(--bg);border-top:2px solid var(--line);font-weight:600}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+.c-money{display:contents}
+@media (max-width:700px){
+  .row.th{display:none}
+  .row{min-width:0;grid-template-columns:1fr auto;grid-template-areas:"fecha del" "cliente cliente" "rosas rosas" "money money" "estado estado";row-gap:10px;column-gap:12px;padding:16px}
+  .c-fecha{grid-area:fecha}
+  .c-cliente{grid-area:cliente}
+  .c-rosas{grid-area:rosas}
+  .c-estado{grid-area:estado}
+  .c-estado .estado{height:44px}
+  .c-del{grid-area:del;justify-self:end;align-self:start}
+  .c-money{display:flex;flex-direction:column;gap:6px;grid-area:money;background:var(--bg);border-radius:10px;padding:10px 12px}
+  .c-precio,.c-reserva,.c-debe{display:flex;justify-content:space-between;text-align:left}
+  .c-precio::before{content:"Precio";color:var(--muted);font-weight:400}
+  .c-reserva::before{content:"Reserva";color:var(--muted);font-weight:400}
+  .c-debe::before{content:"Debe";color:var(--muted);font-weight:400}
+  .row.tot .c-cliente,.row.tot .c-estado{display:none}
+}
+.fecha{font-size:17px;font-weight:700}
+.badge{display:inline-block;margin-top:4px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:600}
+.b-ok{background:#DFF1EE;color:var(--ok)} .b-warn{background:#FFF0C9;color:var(--warn)} .b-bad{background:#FBE3DC;color:var(--bad)} .b-done{background:#ECE7E5;color:#5F4E54}
+.who{font-weight:600} .where{font-size:13px;color:var(--muted)}
+.obs{font-size:12px;color:var(--muted);font-style:italic;margin-top:2px}
+.dot{display:inline-block;width:14px;height:14px;border-radius:50%;vertical-align:-2px;margin-right:6px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.2)}
+.estado{height:34px;border:1px solid #DCCBC4;border-radius:10px;padding:0 6px;background:#fff;font-size:13px;font-weight:600;width:100%}
+.x{width:36px;height:36px;border-radius:10px;border:1px solid #DCCBC4;background:#fff;font-size:18px;line-height:1}
+.pay{margin-top:4px;padding:2px 8px;border:1px solid var(--accent);border-radius:999px;background:#fff;color:var(--accent);font-size:12px;font-weight:600;height:auto}
+.wa{margin-top:6px;width:32px;height:32px;padding:0;border:none;border-radius:50%;background:#25D366;display:inline-flex;align-items:center;justify-content:center;vertical-align:middle}
+.wa svg{width:18px;height:18px;fill:#fff}
+.empty{padding:36px 20px;text-align:center;color:var(--muted)}
+.pad{padding:20px}
+.progress{height:16px;border-radius:999px;background:var(--accent-soft);overflow:hidden;margin:14px 0 10px}
+.progress>div{height:100%;background:var(--accent)}
+.line{display:flex;justify-content:space-between;padding:9px 0;border-top:1px solid #F0E6E1;font-size:14px}
+.line span:first-child{color:var(--muted)}
+.cbar{display:grid;grid-template-columns:100px 1fr 30px;gap:10px;align-items:center;margin-top:12px;font-size:14px}
+.cbar .t{height:10px;border-radius:999px;background:#F3EAE6}
+.cbar .t>div{height:10px;border-radius:999px;background:var(--accent)}
+form.card{padding:22px;position:sticky;top:16px}
+@media (max-width:1000px){form.card{position:static}}
+label{display:block;font-size:13px;font-weight:600;color:#5F4E54;margin-bottom:6px}
+input[type=text],input[type=number],input[type=date],input[type=tel],select.f{width:100%;height:44px;border:1px solid #D9C9C2;border-radius:10px;padding:0 12px;background:#fff}
+textarea.f{width:100%;min-height:64px;border:1px solid #D9C9C2;border-radius:10px;padding:10px 12px;background:#fff;resize:vertical}
+.f-entrega label{color:var(--accent);font-size:14px}
+.f-entrega input{height:52px;border:2px solid var(--accent);font-size:19px;font-weight:700}
+.fg{margin-top:14px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.qtyrow{display:grid;grid-template-columns:1fr 110px;gap:10px}
+.swatches{display:flex;flex-wrap:wrap;gap:12px}
+.sw{width:44px;height:44px;border-radius:50%;border:none;padding:0;box-shadow:inset 0 0 0 1px rgba(0,0,0,.18)}
+.sw[aria-pressed="true"]{box-shadow:0 0 0 2px #fff,0 0 0 4px var(--gold)}
+.seg{display:grid;grid-template-columns:1fr 1fr;border:1px solid #D9C9C2;border-radius:10px;overflow:hidden}
+.seg button{height:44px;border:none;background:#fff;font-weight:600}
+.seg button[aria-pressed="true"]{background:var(--accent);color:#fff}
+.calc{background:var(--bg);border-radius:12px;padding:14px;margin-top:16px}
+.calc .r{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
+.calc input{width:130px;text-align:right;height:38px;font-weight:600}
+.calc .debe{border-top:1px solid #E5D8D2;padding-top:10px;margin-bottom:0;font-weight:700;font-size:17px}
+.save{width:100%;height:52px;border-radius:12px;margin-top:16px;font-size:16px}
+.err{color:var(--bad);font-size:13px;margin-top:8px;min-height:18px}
+details.card{margin-top:20px}
+summary{padding:16px 20px;cursor:pointer;font-family:var(--serif);font-size:20px;font-weight:700;color:var(--accent)}
+.prices{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px;padding:0 20px 20px}
+.prices input{height:40px}
+.note{padding:0 20px 18px;color:var(--muted);font-size:13px}
+.aumento{margin:0 20px 18px;padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}
+.aumento label{font-weight:700}
+.aum-fila{display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap}
+.aum-fila input{width:90px;height:40px}
+.lista-calc{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:4px 12px;padding:0 20px 20px;font-size:13px}
+.lista-calc b{display:inline-block;min-width:22px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap" id="app" style="display:none">
+  <header>
+    <div class="brand">
+      <img src="../img/marca.png" alt="Reina Dabi" width="98" height="64">
+      <div>
+        <h1>Reina Dabi</h1>
+        <div class="sub">Tablero de pedidos de rosas</div>
+        <div class="tagline">"detalles que duran para siempre"</div>
+      </div>
+    </div>
+    <div class="bar">
+      <label for="mes" style="margin:0;position:absolute;left:-9999px">Mes de entrega</label>
+      <select id="mes" class="pill"></select>
+      <button class="btn ghost" id="csv" type="button">Descargar CSV</button>
+      <button class="btn ghost" id="clear" type="button">Borrar todo</button>
+      <button class="btn ghost" id="logout" type="button">Salir</button>
+    </div>
+  </header>
+
+  <nav class="viewtabs" role="group" aria-label="Sección">
+    <button class="viewtab" type="button" data-view="pedidos" aria-pressed="true">📋 Pedidos</button>
+    <button class="viewtab" type="button" data-view="balance" aria-pressed="false">💰 Balance</button>
+  </nav>
+
+  <div class="layout" id="view-pedidos">
+    <main>
+      <section class="kpis" id="kpis-pedidos" aria-label="Resumen de pedidos"></section>
+
+      <section class="card">
+        <div class="head">
+          <h2>Próximas entregas</h2>
+          <div class="tabs" role="group" aria-label="Filtro">
+            <button class="tab" type="button" data-tab="activos" aria-pressed="true">Activos</button>
+            <button class="tab" type="button" data-tab="entregados" aria-pressed="false">Entregados</button>
+            <button class="tab" type="button" data-tab="todos" aria-pressed="false">Todos</button>
+          </div>
+        </div>
+        <div class="scroll">
+          <div class="row th"><div>Entrega</div><div>Cliente</div><div>Rosas</div><div class="c-money"><div class="num">Precio</div><div class="num">Reserva</div><div class="num">Debe</div></div><div>Estado</div><div></div></div>
+          <div id="rows"></div>
+          <div class="row tot" id="tot"></div>
+        </div>
+      </section>
+
+      <section class="card pad" style="margin-top:20px">
+        <h2>Rosas por color</h2>
+        <div class="sub">Para armar: pedidos reservados o en preparación</div>
+        <div id="colors"></div>
+      </section>
+    </main>
+
+    <form class="card" id="form" autocomplete="off">
+      <h2 style="font-family:var(--serif);font-size:24px;margin:0" id="formTitle">Nuevo pedido</h2>
+      <div class="sub" id="hoy"></div>
+
+      <div class="fg f-entrega"><label for="entrega">Fecha de entrega</label><input type="date" id="entrega" required></div>
+
+      <div class="fg">
+        <label for="qty">Cantidad de rosas</label>
+        <div class="qtyrow">
+          <select id="qty" class="f"></select>
+          <input type="number" id="otro" min="1" placeholder="Otro nº" aria-label="Otra cantidad de rosas">
+        </div>
+      </div>
+
+      <div class="fg">
+        <label id="lbl-color">Color de rosas: <span id="colorName"></span></label>
+        <div class="swatches" id="swatches" role="group" aria-labelledby="lbl-color"></div>
+      </div>
+
+      <div class="fg"><label for="nombre">Nombre</label><input type="text" id="nombre" required></div>
+      <div class="two fg">
+        <div><label for="tel">Teléfono</label><input type="tel" id="tel" placeholder="11 0000 0000"></div>
+        <div><label for="lugar">De dónde es</label><input type="text" id="lugar"></div>
+      </div>
+      <div class="fg">
+        <div class="seg" role="group" aria-label="Entrega">
+          <button type="button" id="retira" aria-pressed="true">Retira</button>
+          <button type="button" id="envia" aria-pressed="false">Se envía</button>
+        </div>
+      </div>
+
+      <div class="fg"><label for="obs">Observaciones</label><textarea class="f" id="obs" rows="2" placeholder="Detalles del pedido, dedicatoria, pedido especial, etc."></textarea></div>
+
+      <div class="calc">
+        <div class="r"><label for="precio" style="margin:0">Precio (según cantidad)</label><input type="number" id="precio" min="0" step="500"></div>
+        <div class="r"><label for="reserva" style="margin:0">Reserva (se descuenta)</label><input type="number" id="reserva" min="0" step="500"></div>
+        <div class="r debe"><span>Cuánto debe</span><span id="debe" style="color:var(--bad)"></span></div>
+      </div>
+      <div class="err" id="err" role="alert"></div>
+      <button class="btn save" type="submit" id="saveBtn">Guardar pedido</button>
+      <button class="btn ghost save" type="button" id="cancelEdit" style="display:none;margin-top:8px">Cancelar edición</button>
+    </form>
+  </div>
+
+  <div id="view-balance">
+    <section class="kpis" id="kpis-balance" aria-label="Resumen financiero"></section>
+
+    <section class="card pad">
+      <h2>Balance</h2>
+      <div class="progress"><div id="pbar" style="width:0%"></div></div>
+      <div class="line" style="border-top:none"><span>Cobrado</span><b id="b-paid"></b></div>
+      <div class="line"><span>Falta cobrar</span><b id="b-owed"></b></div>
+      <div class="line"><span>Facturado</span><b id="b-total"></b></div>
+      <div class="line"><span>Costo de materiales</span><b id="b-cost"></b></div>
+      <div class="line"><span>Ganancia estimada</span><b id="b-profit" style="color:var(--ok)"></b></div>
+    </section>
+
+    <section class="card pad" style="margin-top:20px">
+      <h2>Rosas por color por mes</h2>
+      <div class="sub">Elegí el mes · cuenta todos los pedidos de ese mes de entrega</div>
+      <div id="colorsMes"></div>
+    </section>
+
+    <details class="card">
+      <summary>Lista de precios y costo</summary>
+      <div class="prices" id="prices"></div>
+      <div class="note">De 1 a 7 rosas se usa el precio del ramo. Desde 8 rosas: cantidad × precio por rosa, redondeado a $1.000, y nunca menos que el ramo de una rosa menos + $1.000.</div>
+      <div class="aumento">
+        <label for="aum-pct">Aumentar todos los precios</label>
+        <div class="aum-fila"><input type="number" id="aum-pct" min="1" max="100" step="1" value="5"><span>%</span><button class="btn" type="button" id="aum-aplicar">Aplicar aumento</button></div>
+        <div class="note" id="aum-ultimo" style="padding:6px 0 0"></div>
+        <div class="note" id="aum-msj" role="status" style="padding:2px 0 0;color:var(--ok)"></div>
+      </div>
+      <div class="note"><b>Así queda la lista</b></div>
+      <div class="lista-calc" id="lista-calc"></div>
+    </details>
+  </div>
+  <nav style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:28px 0 8px">
+    <a class="btn" href="https://studioproar.github.io/reina-dabi/admin.html" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;text-decoration:none">📊 Panel de la web</a>
+    <a class="btn ghost" href="https://studioproar.github.io/reina-dabi/" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;text-decoration:none">🌹 Ver la página</a>
+  </nav>
+</div>
+
+<div class="wrap" id="loginGate" style="display:none">
+  <form class="card pad login-wrap" id="loginForm" autocomplete="off">
+    <div style="text-align:center;margin-bottom:8px"><img src="../img/logo-completo.png" alt="Reina Dabi" width="180" height="169"></div>
+    <h2 style="font-family:var(--serif);font-size:24px;margin:0 0 4px;text-align:center">Reina Dabi</h2>
+    <div class="sub" style="margin-bottom:18px;text-align:center">Ingresá para ver el tablero</div>
+    <div class="fg" style="margin-top:0"><label for="loginEmail">Email</label><input type="text" id="loginEmail" autocomplete="username"></div>
+    <div class="fg"><label for="loginPass">Contraseña</label><input type="password" id="loginPass" autocomplete="current-password"></div>
+    <div class="err" id="loginErr" role="alert"></div>
+    <button class="btn save" type="submit">Ingresar</button>
+  </form>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script>
+(function(){
+  var firebaseConfig={
+    apiKey:"AIzaSyBjvUjaYzHTpfer4GItAvrm8FYUFSEzQJQ",
+    authDomain:"rosas-eternas-af9ab.firebaseapp.com",
+    databaseURL:"https://rosas-eternas-af9ab-default-rtdb.firebaseio.com",
+    projectId:"rosas-eternas-af9ab",
+    storageBucket:"rosas-eternas-af9ab.firebasestorage.app",
+    messagingSenderId:"269199668290",
+    appId:"1:269199668290:web:724fa44412c7ca721029db"
+  };
+  firebase.initializeApp(firebaseConfig);
+  var auth=firebase.auth();
+  var db=firebase.database();
+  var ordersRef=db.ref('pedidos/orders');
+  var configRef=db.ref('pedidos/config');
+  // Lista vigente (oct 2026): de 1 a 7 rosas precio por ramo; desde 8, precio por rosa según la cantidad
+  var DEFAULT_PRICES={1:5000,2:8000,3:10000,4:12000,5:14000,6:16000,7:18000};
+  var DEFAULT_BANDAS={perRose8:2285,perRose15:2000,perRose21:1800}, DEFAULT_COSTROSE=800, TARIFA=2;
+
+  var COLORS={
+    rojo:['Rojo','#B3122F'], vino:['Vino','#6E1224'], rosa:['Rosa','#E89BB3'], rosaBebe:['Rosa bebé','#F6D3DE'], fucsia:['Fucsia','#E4357B'],
+    blanco:['Blanco','#F6F1EC'], champagne:['Champagne','#E8D9B5'], amarillo:['Amarillo','#E9B949'],
+    naranja:['Naranja','#E8752F'], durazno:['Durazno','#F2957A'], lila:['Lila','#C9A6D9'],
+    violeta:['Violeta','#7B4BA0'], azul:['Azul','#3E6FB0'], celeste:['Celeste','#7EC8E3'],
+    verde:['Verde','#5E8F6B'], negro:['Negro','#1F1B1D'], dorado:['Dorado','#C9962C'], plateado:['Plateado','#C7C7C9'],
+    combinado:['Combinado','conic-gradient(#8E1E48,#C9962C,#E4357B,#8E1E48)'], otro:['Otro','#FFFFFF']
+  };
+  var ESTADOS=['Reservado','En preparación','Listo','Entregado'];
+  var TIERS=[1,2,3,4,5,6,7];
+  var DAYS=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+  var MONTHS=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+
+  function $(id){return document.getElementById(id)}
+  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+  function money(n){return '$'+Math.round(n).toLocaleString('es-AR')}
+  function iso(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+  function parse(s){var p=s.split('-');return new Date(+p[0],+p[1]-1,+p[2])}
+  function today(){var d=new Date();return new Date(d.getFullYear(),d.getMonth(),d.getDate())}
+  function addDays(n){var d=today();d.setDate(d.getDate()+n);return iso(d)}
+
+  var S={orders:[],prices:{},perRose8:DEFAULT_BANDAS.perRose8,perRose15:DEFAULT_BANDAS.perRose15,perRose21:DEFAULT_BANDAS.perRose21,costRose:DEFAULT_COSTROSE,ultimoAumento:null};
+  // Precio de un ramo: de 1 a 7 rosas, el de la lista; desde 8, cantidad × precio por rosa redondeado a $1.000.
+  // Regla desde 8 rosas: nunca menos que el ramo de una rosa menos + $1.000, redondeado a $1.000 (así no hay saltos para atrás).
+  function porRosa(q){return q<=14?S.perRose8:q<=20?S.perRose15:S.perRose21}
+  function priceFor(q){
+    q=Math.max(1,Math.floor(+q||1)); var p=0;
+    for(var i=1;i<=q;i++){
+      var v=(i<=7&&S.prices[i]!=null&&S.prices[i]!=='')?+S.prices[i]:Math.round(i*porRosa(i)/1000)*1000;
+      p=i<=7?v:Math.max(v,Math.ceil((p+1000)/1000)*1000);
+    }
+    return p;
+  }
+
+  // Formulario
+  var F={qty:9,color:'verde',envio:false,precioManual:false,reservaManual:false};
+  function suggestedReserva(p){return Math.round(p*0.5/500)*500}
+  function refreshForm(){
+    if(!F.precioManual) $('precio').value=priceFor(F.qty);
+    if(!F.reservaManual) $('reserva').value=suggestedReserva(+$('precio').value||0);
+    var d=(+$('precio').value||0)-(+$('reserva').value||0);
+    $('debe').textContent=money(Math.max(d,0));
+    $('colorName').textContent=COLORS[F.color][0];
+    Array.prototype.forEach.call($('swatches').children,function(b){b.setAttribute('aria-pressed',String(b.dataset.c===F.color))});
+    $('retira').setAttribute('aria-pressed',String(!F.envio));
+    $('envia').setAttribute('aria-pressed',String(F.envio));
+  }
+  function buildForm(){
+    var q=$('qty'); q.innerHTML='';
+    for(var i=1;i<=21;i++){var o=document.createElement('option');o.value=i;o.textContent=i+(i===1?' rosa':' rosas');q.appendChild(o)}
+    q.value=F.qty;
+    var sw=$('swatches'); sw.innerHTML='';
+    Object.keys(COLORS).forEach(function(k){
+      var b=document.createElement('button'); b.type='button'; b.className='sw'; b.dataset.c=k;
+      b.style.background=COLORS[k][1]; b.setAttribute('aria-label',COLORS[k][0]); b.setAttribute('aria-pressed','false');
+      b.onclick=function(){F.color=k;refreshForm()}; sw.appendChild(b);
+    });
+    var t=today(); $('hoy').textContent='Fecha de pedido: hoy '+DAYS[t.getDay()]+' '+String(t.getDate()).padStart(2,'0')+'/'+String(t.getMonth()+1).padStart(2,'0')+' (se completa sola)';
+    $('entrega').min=iso(t);
+    q.onchange=function(){F.qty=+q.value;$('otro').value='';F.precioManual=false;F.reservaManual=false;refreshForm()};
+    $('otro').oninput=function(){var n=parseInt($('otro').value,10); if(n>0){F.qty=n;F.precioManual=false;F.reservaManual=false;refreshForm()}};
+    $('precio').oninput=function(){F.precioManual=true;if(!F.reservaManual)$('reserva').value=suggestedReserva(+$('precio').value||0);refreshForm()};
+    $('reserva').oninput=function(){F.reservaManual=true;refreshForm()};
+    $('retira').onclick=function(){F.envio=false;refreshForm()};
+    $('envia').onclick=function(){F.envio=true;refreshForm()};
+    $('form').onsubmit=function(e){
+      e.preventDefault();
+      var nombre=$('nombre').value.trim(), ent=$('entrega').value;
+      if(!ent){$('err').textContent='Falta la fecha de entrega.';return}
+      if(!nombre){$('err').textContent='Falta el nombre.';return}
+      $('err').textContent='';
+      var data={entrega:ent,nombre:nombre,tel:$('tel').value.trim(),lugar:$('lugar').value.trim(),
+        envio:F.envio,qty:F.qty,color:F.color,precio:+$('precio').value||0,pagado:+$('reserva').value||0,costo:F.qty*S.costRose,
+        observaciones:$('obs').value.trim()};
+      if(editingId){
+        ordersRef.child(editingId).update(data);
+        exitEdit();
+      }else{
+        data.creado=iso(today()); data.estado='Reservado';
+        ordersRef.push(data);
+        $('nombre').value='';$('tel').value='';$('lugar').value='';$('entrega').value='';$('obs').value='';
+        F.precioManual=false;F.reservaManual=false; refreshForm();
+      }
+    };
+    $('cancelEdit').onclick=function(){ exitEdit(); };
+    refreshForm();
+  }
+
+  function enterEdit(o){
+    editingId=o.id;
+    F.qty=o.qty; F.color=o.color; F.envio=!!o.envio; F.precioManual=true; F.reservaManual=true;
+    $('entrega').value=o.entrega; $('otro').value='';
+    $('nombre').value=o.nombre||''; $('tel').value=o.tel||''; $('lugar').value=o.lugar||'';
+    $('obs').value=o.observaciones||''; $('precio').value=o.precio; $('reserva').value=o.pagado;
+    if(o.qty>=1&&o.qty<=21){ $('qty').value=o.qty; } else { $('otro').value=o.qty; }
+    refreshForm();
+    $('formTitle').textContent='Editar pedido';
+    $('saveBtn').textContent='Guardar cambios';
+    $('cancelEdit').style.display='';
+    $('err').textContent='';
+    $('form').scrollIntoView({behavior:'smooth',block:'start'});
+  }
+  function exitEdit(){
+    editingId=null;
+    $('nombre').value='';$('tel').value='';$('lugar').value='';$('entrega').value='';$('obs').value='';
+    F.qty=9;F.color='verde';F.envio=false;F.precioManual=false;F.reservaManual=false;
+    $('formTitle').textContent='Nuevo pedido';
+    $('saveBtn').textContent='Guardar pedido';
+    $('cancelEdit').style.display='none';
+    $('err').textContent='';
+    refreshForm();
+  }
+
+  // Lista de precios
+  function buildPrices(){
+    var caja=$('prices');
+    if(!caja.contains(document.activeElement)){
+      var h='';
+      TIERS.forEach(function(t){h+='<div><label for="p'+t+'">'+t+(t===1?' rosa':' rosas')+'</label><input type="number" id="p'+t+'" data-t="'+t+'" min="0" step="100" value="'+(S.prices[t]==null?'':S.prices[t])+'"></div>'});
+      [['perRose8','De 8 a 14, por rosa'],['perRose15','De 15 a 20, por rosa'],['perRose21','21 o más, por rosa']].forEach(function(b){h+='<div><label for="'+b[0]+'">'+b[1]+'</label><input type="number" id="'+b[0]+'" data-banda="'+b[0]+'" min="0" step="5" value="'+S[b[0]]+'"></div>'});
+      h+='<div><label for="pc">Costo por rosa</label><input type="number" id="pc" min="0" step="50" value="'+S.costRose+'"></div>';
+      caja.innerHTML=h;
+    }
+    var u=S.ultimoAumento;
+    $('aum-ultimo').textContent=u?'Último aumento: '+u.pct+'% el '+u.fecha.split('-').reverse().join('/'):'Todavía no se aplicó ningún aumento.';
+    var l=''; for(var q=1;q<=30;q++) l+='<span><b>'+q+'</b> '+money(priceFor(q))+'</span>';
+    $('lista-calc').innerHTML=l;
+  }
+  $('prices').oninput=function(e){
+    var el=e.target;
+    if(el.dataset.t){configRef.child('prices/'+el.dataset.t).set(el.value===''?null:+el.value)}
+    else if(el.dataset.banda){var o={}; o[el.dataset.banda]=+el.value||0; configRef.update(o)}
+    else if(el.id==='pc'){configRef.update({costRose:+el.value||0})}
+    F.precioManual=false;F.reservaManual=false;
+  };
+  $('prices').addEventListener('focusout',function(){setTimeout(function(){if(!$('prices').contains(document.activeElement))buildPrices()},0)});
+  // Aumento general: sube todos los precios el mismo porcentaje (ramos de 1 a 7 redondeados a $100, por rosa a $5)
+  $('aum-aplicar').onclick=function(){
+    var pct=+$('aum-pct').value;
+    if(!(pct>0&&pct<=100)){ $('aum-msj').textContent='Poné un porcentaje entre 1 y 100.'; return; }
+    var k=1+pct/100, nuevos={}, cambios={};
+    TIERS.forEach(function(t){ if(S.prices[t]!=null&&S.prices[t]!=='') nuevos[t]=Math.round(S.prices[t]*k/100)*100; });
+    ['perRose8','perRose15','perRose21'].forEach(function(b){ cambios[b]=Math.round(S[b]*k/5)*5; });
+    if(!confirm('¿Subir todos los precios un '+pct+'%?\n\nEjemplo: 1 rosa pasa de '+money(S.prices[1]||0)+' a '+money(nuevos[1]||0)+' y de 8 a 14 por rosa de '+money(S.perRose8)+' a '+money(cambios.perRose8)+'.\n\nLos pedidos ya cargados no cambian.')) return;
+    cambios.prices=nuevos; cambios.ultimoAumento={pct:pct,fecha:iso(today())};
+    configRef.update(cambios).then(function(){ $('aum-msj').textContent='Listo: precios aumentados un '+pct+'%.'; F.precioManual=false; });
+  };
+  // Vista (Pedidos / Balance)
+  var view='pedidos';
+  function setView(v){
+    view=v;
+    $('view-pedidos').style.display=(v==='pedidos'?'grid':'none');
+    $('view-balance').style.display=(v==='balance'?'block':'none');
+    Array.prototype.forEach.call(document.querySelectorAll('.viewtab'),function(b){b.setAttribute('aria-pressed',String(b.dataset.view===v))});
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('.viewtab'),function(b){b.onclick=function(){setView(b.dataset.view)}});
+  setView('pedidos');
+
+  // Tablero
+  var tab='activos', mes='todos', editingId=null, mesColor='', mesPrev='todos';
+  function debe(o){return Math.max(o.precio-o.pagado,0)}
+  function render(){
+    // meses
+    var ms={}; S.orders.forEach(function(o){ms[o.entrega.slice(0,7)]=1});
+    var keys=Object.keys(ms).sort();
+    if(mes!=='todos' && !ms[mes]) mes='todos';
+    var sel=$('mes'); sel.innerHTML='<option value="todos">Todos los meses</option>'+keys.map(function(k){var p=k.split('-');return '<option value="'+k+'"'+(k===mes?' selected':'')+'>'+MONTHS[+p[1]-1]+' '+p[0]+'</option>'}).join('');
+    var inMes=S.orders.filter(function(o){return mes==='todos'||o.entrega.slice(0,7)===mes});
+    // KPIs sobre el mes
+    var total=0,paid=0,cost=0,roses=0,owedN=0,act=0;
+    inMes.forEach(function(o){total+=o.precio;paid+=o.pagado;cost+=o.costo;roses+=o.qty;if(debe(o)>0)owedN++;if(o.estado!=='Entregado')act++});
+    var owed=total-paid, profit=total-cost;
+    var sorted=inMes.slice().sort(function(a,b){return a.entrega<b.entrega?-1:a.entrega>b.entrega?1:0});
+    var nxt=sorted.filter(function(o){return o.estado!=='Entregado'})[0];
+    $('kpis-pedidos').innerHTML=
+      kpi('Pedidos activos',act,nxt?'próxima: '+fmtDate(nxt.entrega):'sin pendientes')+
+      kpi('Rosas del mes',roses,roses+' rosas cargadas');
+    $('kpis-balance').innerHTML=
+      kpi('Facturado',money(total),roses+' rosas')+
+      kpi('Cobrado (reservas)',money(paid),(total?Math.round(paid/total*100):0)+'% del total')+
+      kpi('Falta cobrar',money(owed),owedN+' pedidos con saldo','var(--bad)')+
+      kpi('Ganancia estimada',money(profit),'margen '+(total?Math.round(profit/total*100):0)+'%','var(--ok)');
+    // Tabla
+    var shown=sorted.filter(function(o){return tab==='todos'||(tab==='activos'?o.estado!=='Entregado':o.estado==='Entregado')});
+    var rows='';
+    shown.forEach(function(o){
+      var diff=Math.round((parse(o.entrega)-today())/86400000), cls='b-ok', txt='en '+diff+' días';
+      if(o.estado==='Entregado'){cls='b-done';txt='entregado'}
+      else{ if(diff<0){txt='atrasado';cls='b-bad'} else if(diff===0){txt='hoy';cls='b-bad'} else if(diff===1){txt='mañana';cls='b-bad'} else if(diff<=2){cls='b-bad'} else if(diff<=7){cls='b-warn'} }
+      var d=debe(o);
+      rows+='<div class="row" data-id="'+esc(o.id)+'">'+
+        '<div class="c-fecha"><div class="fecha">'+fmtDate(o.entrega)+'</div><span class="badge '+cls+'">'+txt+'</span></div>'+
+        '<div class="c-cliente"><div class="who">'+esc(o.nombre)+'</div><div class="where">'+esc([o.lugar,o.envio?'Envío':'Retira',o.tel].filter(Boolean).join(' · '))+'</div>'+(o.observaciones?'<div class="obs">📝 '+esc(o.observaciones)+'</div>':'')+'<button type="button" class="wa" data-act="wa" aria-label="WhatsApp Business a '+esc(o.nombre)+'"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.48 1.32 5L2 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2m0 1.8a8.1 8.1 0 0 1 8.1 8.11c0 4.47-3.63 8.1-8.1 8.1a8.07 8.07 0 0 1-4.11-1.12l-.29-.17-3.02.79.81-2.94-.19-.3a8.06 8.06 0 0 1-1.24-4.36c0-4.47 3.63-8.11 8.1-8.11m-2.32 3.6c-.19 0-.5.07-.76.36-.26.28-1 .98-1 2.39s1.03 2.77 1.17 2.96c.14.19 2 3.05 4.85 4.28.68.29 1.21.46 1.62.6.68.21 1.3.18 1.79.11.55-.08 1.68-.69 1.92-1.35.24-.67.24-1.24.17-1.36-.07-.12-.26-.19-.55-.33-.28-.14-1.68-.83-1.94-.92-.26-.1-.45-.14-.64.14-.19.28-.73.92-.9 1.11-.16.19-.33.21-.61.07-.28-.14-1.18-.44-2.24-1.39-.83-.74-1.39-1.65-1.55-1.93-.16-.28-.02-.43.12-.57.13-.13.28-.33.42-.5.14-.16.19-.28.28-.47.09-.19.05-.35-.02-.5-.07-.14-.64-1.56-.89-2.14-.23-.56-.47-.48-.64-.49z"/></svg></button></div>'+
+        '<div class="c-rosas"><span class="dot" style="background:'+COLORS[o.color][1]+'"></span>'+o.qty+' · '+COLORS[o.color][0]+'</div>'+
+        '<div class="c-money">'+
+          '<div class="c-precio num">'+money(o.precio)+'</div>'+
+          '<div class="c-reserva num">'+money(o.pagado)+'</div>'+
+          '<div class="c-debe num"><b>'+(d>0?money(d):'—')+'</b>'+(d>0?' <button type="button" class="pay" data-act="pay">Cobrar</button>':'')+'</div>'+
+        '</div>'+
+        '<div class="c-estado"><select class="estado" data-act="estado" aria-label="Estado de '+esc(o.nombre)+'">'+ESTADOS.map(function(e){return '<option'+(e===o.estado?' selected':'')+'>'+e+'</option>'}).join('')+'</select></div>'+
+        '<div class="c-del"><button type="button" class="x" data-act="edit" aria-label="Editar pedido de '+esc(o.nombre)+'">✎</button><button type="button" class="x" data-act="del" aria-label="Borrar pedido de '+esc(o.nombre)+'">×</button></div>'+
+      '</div>';
+    });
+    $('rows').innerHTML=rows||'<div class="empty">No hay pedidos en esta vista. Cargá uno desde el formulario.</div>';
+    var t2=0,p2=0,r2=0; shown.forEach(function(o){t2+=o.precio;p2+=o.pagado;r2+=o.qty});
+    $('tot').innerHTML='<div class="c-fecha">Totales</div><div class="c-cliente"></div><div class="c-rosas">'+r2+' rosas</div><div class="c-money"><div class="c-precio num">'+money(t2)+'</div><div class="c-reserva num">'+money(p2)+'</div><div class="c-debe num">'+money(t2-p2)+'</div></div><div class="c-estado"></div><div class="c-del"></div>';
+    // Balance
+    $('pbar').style.width=(total?Math.round(paid/total*100):0)+'%';
+    $('b-paid').textContent=money(paid);$('b-owed').textContent=money(owed);$('b-total').textContent=money(total);$('b-cost').textContent=money(cost);$('b-profit').textContent=money(profit);
+    // Colores
+    // Colores: solo lo que falta armar (ni Listo ni Entregado)
+    var ct={}, ctTot=0; inMes.forEach(function(o){if(o.estado==='Listo'||o.estado==='Entregado')return; ct[o.color]=(ct[o.color]||0)+o.qty; ctTot+=o.qty});
+    var ck=Object.keys(ct).sort(function(a,b){return ct[b]-ct[a]}), mx=ck.length?ct[ck[0]]:1;
+    $('colors').innerHTML=ck.length?ck.map(function(k){return '<div class="cbar"><div><span class="dot" style="background:'+colorDe(k)[1]+'"></span>'+colorDe(k)[0]+'</div><div class="t"><div style="width:'+Math.round(ct[k]/mx*100)+'%"></div></div><b style="text-align:right">'+ct[k]+'</b></div>'}).join('')+'<div class="line" style="margin-top:12px"><span>Total a armar</span><b>'+ctTot+' rosas</b></div>':'<div class="where" style="margin-top:12px">No hay rosas para armar en este momento.</div>';
+    // Balance: rosas por color del mes elegido (todos los pedidos de ese mes)
+    var pm={}; S.orders.forEach(function(o){var m=o.entrega.slice(0,7); pm[m]=pm[m]||{tot:0,c:{}}; pm[m].c[o.color]=(pm[m].c[o.color]||0)+o.qty; pm[m].tot+=o.qty});
+    var mk=Object.keys(pm).sort();
+    if(mes!==mesPrev){ if(mes!=='todos') mesColor=mes; mesPrev=mes; }
+    if(!pm[mesColor]){ var hoy=new Date(), cur=hoy.getFullYear()+'-'+String(hoy.getMonth()+1).padStart(2,'0'); mesColor=pm[cur]?cur:(mk.filter(function(x){return x>cur})[0]||mk[mk.length-1]||cur); }
+    var hm=mk.length?'<div class="tabs" role="group" aria-label="Mes" style="flex-wrap:wrap;margin-top:12px">'+mk.map(function(x){var q=x.split('-');return '<button type="button" class="mtab" data-mc="'+x+'" aria-pressed="'+(x===mesColor)+'">'+MONTHS[+q[1]-1].slice(0,3)+' '+q[0]+'</button>'}).join('')+'</div>':'';
+    if(pm[mesColor]){
+      var cm=pm[mesColor].c, km=Object.keys(cm).sort(function(a,b){return cm[b]-cm[a]}), mxm=cm[km[0]];
+      hm+=km.map(function(x){return '<div class="cbar"><div><span class="dot" style="background:'+colorDe(x)[1]+'"></span>'+colorDe(x)[0]+'</div><div class="t"><div style="width:'+Math.round(cm[x]/mxm*100)+'%"></div></div><b style="text-align:right">'+cm[x]+'</b></div>'}).join('')+
+        '<div class="line" style="margin-top:12px"><span>Total del mes</span><b>'+pm[mesColor].tot+' rosas</b></div>';
+    } else hm+='<div class="where" style="margin-top:12px">Todavía no hay rosas cargadas.</div>';
+    $('colorsMes').innerHTML=hm;
+  }
+  function colorDe(k){return COLORS[k]||[k,'#ccc']}
+  function kpi(l,v,n,c){return '<div class="kpi"><div class="l">'+l+'</div><div class="v"'+(c?' style="color:'+c+'"':'')+'>'+v+'</div><div class="n">'+n+'</div></div>'}
+  function fmtDate(s){var d=parse(s);return DAYS[d.getDay()]+' '+String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')}
+
+  function waPhone(tel){
+    var d=String(tel||'').replace(/\D/g,'');
+    if(!d) return '';
+    if(d.charAt(0)==='0') d=d.slice(1);
+    if(d.slice(0,2)!=='54') d='549'+d;
+    return d;
+  }
+  function openWhatsAppBusiness(o){
+    var phone=waPhone(o.tel);
+    if(!phone){ alert('Este pedido no tiene telefono cargado.'); return; }
+    if(!/Android/i.test(navigator.userAgent)){ window.open('https://wa.me/'+phone,'_blank'); return; }
+    // Android: fuerza el package de WhatsApp Business (com.whatsapp.w4b).
+    // Sin browser_fallback_url a proposito: si fallara, preferimos avisar antes que
+    // mandar a api.whatsapp.com, que termina abriendo el WhatsApp comun.
+    var a=document.createElement('a');
+    a.href='intent://send?phone='+phone+'#Intent;scheme=whatsapp;package=com.whatsapp.w4b;end';
+    a.style.display='none';
+    document.body.appendChild(a);
+    function done(){ clearTimeout(t); document.removeEventListener('visibilitychange',done); }
+    var t=setTimeout(function(){
+      document.removeEventListener('visibilitychange',done);
+      if(!document.hidden) alert('No se pudo abrir WhatsApp Business. Numero: +'+phone);
+    },1500);
+    document.addEventListener('visibilitychange',done);
+    a.click();
+    document.body.removeChild(a);
+  }
+
+  // Eventos de la tabla
+  $('rows').addEventListener('click',function(e){
+    var b=e.target.closest('[data-act]'); if(!b) return;
+    var row=b.closest('.row'), id=row.dataset.id, o=S.orders.find(function(x){return x.id===id}); if(!o) return;
+    if(b.dataset.act==='pay'){ordersRef.child(id).update({pagado:o.precio})}
+    if(b.dataset.act==='del'){ if(confirm('¿Borrar el pedido de '+o.nombre+'?')){ordersRef.child(id).remove()} }
+    if(b.dataset.act==='edit'){ enterEdit(o); }
+    if(b.dataset.act==='wa'){ openWhatsAppBusiness(o); }
+  });
+  $('rows').addEventListener('change',function(e){
+    var s=e.target.closest('[data-act="estado"]'); if(!s) return;
+    var id=s.closest('.row').dataset.id;
+    ordersRef.child(id).update({estado:s.value});
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('.tab'),function(b){
+    b.onclick=function(){tab=b.dataset.tab;Array.prototype.forEach.call(document.querySelectorAll('.tab'),function(x){x.setAttribute('aria-pressed',String(x===b))});render()};
+  });
+  $('mes').onchange=function(){mes=$('mes').value;render()};
+  $('colorsMes').addEventListener('click',function(e){var b=e.target.closest('[data-mc]'); if(!b) return; mesColor=b.dataset.mc; render()});
+  $('clear').onclick=function(){ if(confirm('¿Borrar todos los pedidos? No se puede deshacer.')){ordersRef.remove()} };
+  $('csv').onclick=function(){
+    var head=['Fecha pedido','Fecha entrega','Nombre','Teléfono','De dónde es','Entrega / Retira','Cantidad rosas','Color','Seña ($)','Precio final ($)','Falta cobrar ($)','Estado','Observaciones'];
+    var lines=[head].concat(S.orders.slice().sort(function(a,b){return a.entrega<b.entrega?-1:1}).map(function(o){
+      return [o.creado,o.entrega,o.nombre,o.tel,o.lugar,o.envio?'Envío':'Retira',o.qty,COLORS[o.color][0],o.pagado,o.precio,debe(o),o.estado,o.observaciones||''];
+    }));
+    var csv='﻿'+lines.map(function(r){return r.map(function(c){return '"'+String(c==null?'':c).replace(/"/g,'""')+'"'}).join(';')}).join('\r\n');
+    var a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'})); a.download='pedidos-reina-dabi.csv'; a.click(); setTimeout(function(){URL.revokeObjectURL(a.href)},1000);
+  };
+
+  buildForm();
+
+  // Login / datos en vivo desde Firebase
+  var loaded={config:false,orders:false};
+  function tryRender(){ if(loaded.config&&loaded.orders) render(); }
+  function onConfigSnap(snap){
+    if(!snap.exists()){ configRef.set({prices:DEFAULT_PRICES,perRose8:DEFAULT_BANDAS.perRose8,perRose15:DEFAULT_BANDAS.perRose15,perRose21:DEFAULT_BANDAS.perRose21,costRose:DEFAULT_COSTROSE,tarifa:TARIFA}); return; }
+    var c=snap.val();
+    // Pasa una sola vez a la lista nueva (reemplaza los tramos viejos 1-3-5-7-14-21 y el precio único por rosa)
+    if(c.tarifa!==TARIFA){
+      var nueva={prices:DEFAULT_PRICES,perRose8:DEFAULT_BANDAS.perRose8,perRose15:DEFAULT_BANDAS.perRose15,perRose21:DEFAULT_BANDAS.perRose21,perRose:null,tarifa:TARIFA};
+      configRef.update(nueva).catch(function(err){console.warn('No se pudo guardar la lista nueva',err)});
+      c=Object.assign({},c,nueva);
+    }
+    S.prices=c.prices||{}; S.costRose=c.costRose!=null?c.costRose:DEFAULT_COSTROSE; S.ultimoAumento=c.ultimoAumento||null;
+    ['perRose8','perRose15','perRose21'].forEach(function(b){S[b]=c[b]!=null?+c[b]:DEFAULT_BANDAS[b]});
+    loaded.config=true; buildPrices(); refreshForm(); tryRender();
+  }
+  function onOrdersSnap(snap){
+    var v=snap.val()||{};
+    S.orders=Object.keys(v).map(function(id){var o=v[id]; o.id=id; return o});
+    loaded.orders=true; tryRender();
+  }
+  function attachListeners(){ configRef.on('value',onConfigSnap); ordersRef.on('value',onOrdersSnap); }
+  function detachListeners(){ configRef.off('value',onConfigSnap); ordersRef.off('value',onOrdersSnap); loaded.config=false; loaded.orders=false; }
+
+  auth.onAuthStateChanged(function(user){
+    if(user){
+      $('app').style.display=''; $('loginGate').style.display='none'; $('loginErr').textContent='';
+      attachListeners();
+    }else{
+      detachListeners();
+      $('app').style.display='none'; $('loginGate').style.display='';
+    }
+  });
+  $('loginForm').onsubmit=function(e){
+    e.preventDefault();
+    var email=$('loginEmail').value.trim(), pass=$('loginPass').value;
+    $('loginErr').textContent='';
+    auth.signInWithEmailAndPassword(email,pass).catch(function(){
+      $('loginErr').textContent='No se pudo ingresar: revisá el email y la contraseña.';
+    });
+  };
+  $('logout').onclick=function(){ auth.signOut(); };
+
+})();
+</script>
+</body>
+</html>
