@@ -122,13 +122,13 @@ footer{padding-block:26px 34px;font-size:12.5px;color:var(--soft);display:flex;j
       <p class="aviso lee">Esta versión es <b>solo de lectura</b>. No modifica nada: para cargar fotos o cambiar el banner seguí usando el panel de siempre.</p>
 
       <h2>Resumen</h2>
-      <p class="sub">Lo marcado <b>Real</b> sale de la base. Lo marcado <b>Ejemplo</b> todavía no se mide: son números de muestra para ver cómo quedaría.</p>
+      <p class="sub">Todo lo que ves sale de la base y se mide sin Google Analytics y sin cookies: nadie más que ustedes ve estos datos.</p>
 
       <div class="tiles">
         <div class="tile"><span class="et real">Real</span><p class="k">Clics a WhatsApp</p><p class="v" id="t-clics">—</p><p class="d">Total histórico</p></div>
         <div class="tile"><span class="et real">Real</span><p class="k">Fotos en la galería</p><p class="v" id="t-fotos">—</p><p class="d">Publicadas ahora</p></div>
-        <div class="tile"><span class="et ej">Ejemplo</span><p class="k">Visitas</p><p class="v">1.284</p><p class="d">Últimos 30 días</p></div>
-        <div class="tile"><span class="et ej">Ejemplo</span><p class="k">Desde el celular</p><p class="v">87%</p><p class="d">De todas las visitas</p></div>
+        <div class="tile"><span class="et real">Real</span><p class="k">Visitas</p><p class="v" id="t-vis">—</p><p class="d">Últimos 30 días</p></div>
+        <div class="tile"><span class="et real">Real</span><p class="k">Visitas de hoy</p><p class="v" id="t-hoy">—</p><p class="d">Desde las 00:00</p></div>
       </div>
     </section>
 
@@ -140,26 +140,25 @@ footer{padding-block:26px 34px;font-size:12.5px;color:var(--soft);display:flex;j
     </section>
 
     <section class="blq">
-      <h2>Lo que se podría medir</h2>
-      <p class="sub">Todo esto se puede activar con un cambio chico en la web. Los números de acá abajo son inventados, para ver el resultado.</p>
+      <h2>Visitas y origen</h2>
+      <p class="sub">Se cuenta una visita por persona y por día. Las medidas empezaron cuando se publicó la web nueva.</p>
 
       <div class="caja">
-        <div class="cab"><h3>Visitas por día</h3><span class="et ej">Ejemplo · 14 días</span></div>
-        <div class="chartwrap"><svg class="barras" id="chart" viewBox="0 0 620 180" role="img" aria-label="Gráfico de ejemplo de visitas diarias de los últimos catorce días"></svg></div>
+        <div class="cab"><h3>Visitas por día</h3><span class="et real">Real · 14 días</span></div>
+        <div class="chartwrap"><svg class="barras" id="chart" viewBox="0 0 620 180" role="img" aria-label="Gráfico de visitas diarias de los últimos catorce días"></svg></div>
       </div>
 
       <div class="dos">
         <div class="caja">
-          <div class="cab"><h3>De dónde llegan</h3><span class="et ej">Ejemplo</span></div>
+          <div class="cab"><h3>De dónde llegan</h3><span class="et real">Real</span></div>
           <div id="origen"></div>
         </div>
         <div class="caja">
-          <div class="cab"><h3>Ramos más mirados</h3><span class="et ej">Ejemplo</span></div>
+          <div class="cab"><h3>Ramos más mirados</h3><span class="et real">Real</span></div>
           <div id="ramos"></div>
         </div>
       </div>
 
-      <p class="aviso ej">Para que estos tres pasen a ser reales hay que agregar la medición en la web y tres permisos nuevos en la base. Se mide sin Google Analytics y sin cookies: nadie más que ustedes ve estos datos.</p>
     </section>
 
     <footer>
@@ -174,37 +173,34 @@ import { firebaseConfig, firebaseListo } from "../firebase-config.js";
 const $ = (id) => document.getElementById(id);
 
 const NOMBRES = { encabezado:"Botón de arriba", portada:"Portada", armador:"Armador de ramo", cierre:"Cierre", pie:"Pie de página", flotante:"Botón flotante" };
-const EJ_DIAS = [31,44,38,52,61,49,37,58,72,66,54,83,91,77];
-const EJ_ORIGEN = [["Instagram",612],["Google",341],["Directo",219],["WhatsApp",112]];
-const EJ_RAMOS = [["21 rosas perfumadas",284],["Lila y dorado",231],["Rojas con tallo",198],["Azul con bombones",142],["Rosa con mariposa",96]];
+const ORIGEN = { directo:"Directo", instagram:"Instagram", whatsapp:"WhatsApp", facebook:"Facebook", google:"Google", otro:"Otros sitios" };
 
 function filas(id, datos, color){
+  if (!datos.length) { $(id).innerHTML = '<p class="vacio">Todavía no hay datos.</p>'; return; }
   const max = Math.max(...datos.map(d => d[1])) || 1;
   $(id).innerHTML = datos.map(d =>
     '<div class="fila"><span class="lbl">' + d[0] + '</span>' +
     '<span class="bar" style="width:' + Math.round(d[1]/max*84) + 'px;background:' + color + '"></span>' +
     '<span class="num">' + d[1] + '</span></div>').join('');
 }
-function grafico(){
+function grafico(dias){
   const W=620,H=180,pb=25,pt=12,pl=30,pr=6;
-  const max = Math.ceil(Math.max(...EJ_DIAS)/20)*20;
-  const alto = H-pb-pt, ancho = (W-pl-pr)/EJ_DIAS.length;
+  const max = Math.max(4, Math.ceil(Math.max(...dias.map(d => d[1]))/4)*4);
+  const alto = H-pb-pt, ancho = (W-pl-pr)/dias.length;
   let s='';
   [0,max/2,max].forEach(v=>{
     const y = pt+alto-(v/max)*alto;
     s += '<line x1="'+pl+'" y1="'+y+'" x2="'+(W-pr)+'" y2="'+y+'" stroke="currentColor" stroke-opacity=".15"/>';
     s += '<text x="'+(pl-6)+'" y="'+(y+4)+'" text-anchor="end" font-size="10" fill="currentColor" fill-opacity=".55">'+v+'</text>';
   });
-  EJ_DIAS.forEach((v,i)=>{
-    const h=(v/max)*alto, x=pl+i*ancho+ancho*0.18, w=ancho*0.64, y=pt+alto-h, ult=i===EJ_DIAS.length-1;
-    s += '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="2" fill="'+(ult?'#8E1E48':'currentColor')+'" fill-opacity="'+(ult?'1':'.3')+'"><title>'+v+' visitas</title></rect>';
-    if(i%3===0||ult) s += '<text x="'+(x+w/2)+'" y="'+(H-8)+'" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity=".55">'+(14-i)+'d</text>';
+  dias.forEach(([f,v],i)=>{
+    const h=(v/max)*alto, x=pl+i*ancho+ancho*0.18, w=ancho*0.64, y=pt+alto-h, ult=i===dias.length-1;
+    s += '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="2" fill="'+(ult?'#8E1E48':'currentColor')+'" fill-opacity="'+(ult?'1':'.3')+'"><title>'+v+' visitas · '+f.slice(8)+'/'+f.slice(5,7)+'</title></rect>';
+    if(i%3===0||ult) s += '<text x="'+(x+w/2)+'" y="'+(H-8)+'" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity=".55">'+(ult?'hoy':f.slice(8)+'/'+f.slice(5,7))+'</text>';
   });
   $('chart').innerHTML = s;
 }
-grafico();
-filas('origen', EJ_ORIGEN, '#8E1E48');
-filas('ramos', EJ_RAMOS, '#9a7320');
+grafico(Array.from({length:14},(_, i) => [new Date(Date.now()-(13-i)*864e5).toLocaleDateString('en-CA'), 0]));
 
 if (!firebaseListo) {
   $('err').textContent = 'Falta la configuración de Firebase.';
@@ -259,6 +255,25 @@ if (!firebaseListo) {
     } catch (x) {
       $('botones').innerHTML = '<p class="vacio">No se pudieron leer los clics.</p>';
       $('t-clics').textContent = '—';
+    }
+
+    try {
+      const S = D.ref(db, 'web/stats');
+      const [vis, ori, ram, gal2] = await Promise.all(['visitas','origen','ramos'].map(n => D.get(D.child(S, n))).concat([D.get(D.ref(db, 'web/galeria'))]));
+      const V = vis.val() || {}, O = ori.val() || {}, R = ram.val() || {};
+      const dia = (k) => new Date(Date.now() - k*864e5).toLocaleDateString('en-CA');
+      const dias = Array.from({length:14}, (_, i) => { const f = dia(13-i); return [f, Number(V[f]) || 0]; });
+      grafico(dias);
+      let t30 = 0; for (let k = 0; k < 30; k++) t30 += Number(V[dia(k)]) || 0;
+      $('t-vis').textContent = t30.toLocaleString('es-AR');
+      $('t-hoy').textContent = (Number(V[dia(0)]) || 0).toLocaleString('es-AR');
+      const sumar = (obj) => { const r = {}; Object.values(obj).forEach(d => Object.entries(d || {}).forEach(([k, n]) => { r[k] = (r[k] || 0) + (Number(n) || 0); })); return r; };
+      filas('origen', Object.entries(sumar(O)).sort((a,b) => b[1]-a[1]).map(([k,n]) => [ORIGEN[k] || k, n]), '#8E1E48');
+      const fotos = Object.values(gal2.val() || {}).sort((a, b) => a.orden - b.orden);
+      filas('ramos', Object.entries(sumar(R)).sort((a,b) => b[1]-a[1]).slice(0,6).map(([k,n]) => [(fotos[Number(k.slice(1))-1] || {}).texto || ('Ramo ' + k.slice(1)), n]), '#9a7320');
+    } catch (x) {
+      ['origen','ramos'].forEach(id => { $(id).innerHTML = '<p class="vacio">No se pudieron leer las visitas.</p>'; });
+      $('t-vis').textContent = '—'; $('t-hoy').textContent = '—';
     }
 
     try {
