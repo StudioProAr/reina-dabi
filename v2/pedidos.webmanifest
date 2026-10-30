@@ -1,0 +1,12 @@
+{
+  "name": "Reina Dabi — Tablero de pedidos",
+  "short_name": "Pedidos",
+  "description": "Tablero de pedidos de rosas eternas",
+  "start_url": "./pedidos.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#FBF6F3",
+  "theme_color": "#8E1E48",
+  "orientation": "portrait-primary",
+  "icons": [{ "src": "../img/logo.jpg", "sizes": "any", "type": "image/jpeg", "purpose": "any" }]
+}
