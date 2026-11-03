@@ -36,7 +36,7 @@ const contar = (boton) => sumar("web/stats/clics/" + hoy() + "/" + boton);
 function fuenteDeVisita() {
   try {
     const q = new URLSearchParams(location.search);
-    let s = (q.get("utm_source") || q.get("from") || "").toLowerCase();
+    let s = (q.get("origen") || q.get("utm_source") || q.get("from") || "").toLowerCase();
     if (!s && document.referrer) {
       const h = new URL(document.referrer).hostname.toLowerCase();
       if (h !== location.hostname) s = h;
