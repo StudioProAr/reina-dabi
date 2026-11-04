@@ -118,6 +118,7 @@ textarea.f{width:100%;min-height:64px;border:1px solid #D9C9C2;border-radius:10p
 .mezcla .mz-head.ok{color:var(--ok)} .mezcla .mz-head.bad{color:var(--bad)}
 .mezcla .mz-sws{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px}
 .mezcla .mz-sws .sw{width:30px;height:30px}
+.mezcla .mz-sws .sw:disabled{opacity:.25;cursor:not-allowed}
 .mz-row{display:flex;align-items:center;gap:8px;margin-top:6px}
 .mz-row .mz-n{flex:1}
 .mz-row button{width:34px;height:34px;border-radius:50%;border:1px solid #DCCBC4;background:#fff;font-weight:700}
@@ -359,9 +360,9 @@ summary{padding:16px 20px;cursor:pointer;font-family:var(--serif);font-size:20px
   function mixSum(){var t=0;for(var k in F.mezcla)t+=F.mezcla[k];return t}
   function renderMezcla(){
     var box=$('mezcla'); if(F.color!=='combinado'){box.style.display='none';box.innerHTML='';return}
-    box.style.display=''; var t=mixSum(), cls=t===F.qty?'ok':(t>F.qty?'bad':'');
-    var h='<div class="mz-head '+cls+'">Combinación: '+t+' de '+F.qty+' rosas asignadas'+(t>F.qty?' (te pasaste)':'')+'</div><div class="mz-sws">';
-    Object.keys(COLORS).forEach(function(k){if(k==='combinado'||k==='otro')return; h+='<button type="button" class="sw" data-mz-add="'+k+'" style="background:'+COLORS[k][1]+'" aria-label="Agregar '+COLORS[k][0]+'" aria-pressed="'+(F.mezcla[k]>0)+'"></button>'});
+    box.style.display=''; var lleno=Object.keys(F.mezcla).length>=3; var t=mixSum(), cls=t===F.qty?'ok':(t>F.qty?'bad':'');
+    var h='<div class="mz-head '+cls+'">Combinación (hasta 3 colores): '+t+' de '+F.qty+' rosas asignadas'+(t>F.qty?' (te pasaste)':'')+'</div><div class="mz-sws">';
+    Object.keys(COLORS).forEach(function(k){if(k==='combinado'||k==='otro')return; h+='<button type="button" class="sw" data-mz-add="'+k+'" style="background:'+COLORS[k][1]+'" aria-label="Agregar '+COLORS[k][0]+'" aria-pressed="'+(F.mezcla[k]>0)+'"'+(lleno&&!(F.mezcla[k]>0)?' disabled':'')+'></button>'});
     h+='</div>'; var ks=Object.keys(F.mezcla);
     if(!ks.length) h+='<div class="where">Tocá los colores que lleva el ramo.</div>';
     ks.forEach(function(k){h+='<div class="mz-row"><span class="dot" style="background:'+COLORS[k][1]+'"></span><span class="mz-n">'+COLORS[k][0]+'</span><button type="button" data-mz-menos="'+k+'" aria-label="Una menos">−</button><b>'+F.mezcla[k]+'</b><button type="button" data-mz-mas="'+k+'" aria-label="Una más">+</button></div>'});
@@ -396,7 +397,7 @@ summary{padding:16px 20px;cursor:pointer;font-family:var(--serif);font-size:20px
     $('precio').oninput=function(){F.precioManual=true;if(!F.reservaManual)$('reserva').value=suggestedReserva(+$('precio').value||0);refreshForm()};
     $('reserva').oninput=function(){F.reservaManual=true;refreshForm()};
     $('mezcla').onclick=function(e){var b=e.target.closest('button'); if(!b) return; var k;
-      if((k=b.dataset.mzAdd)){ if(F.mezcla[k]>0) delete F.mezcla[k]; else F.mezcla[k]=1; }
+      if((k=b.dataset.mzAdd)){ if(F.mezcla[k]>0) delete F.mezcla[k]; else if(Object.keys(F.mezcla).length<3) F.mezcla[k]=1; }
       else if((k=b.dataset.mzMas)){ F.mezcla[k]++; }
       else if((k=b.dataset.mzMenos)){ F.mezcla[k]--; if(F.mezcla[k]<=0) delete F.mezcla[k]; }
       refreshForm(); };
