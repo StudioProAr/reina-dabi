@@ -113,6 +113,15 @@ textarea.f{width:100%;min-height:64px;border:1px solid #D9C9C2;border-radius:10p
 .swatches{display:flex;flex-wrap:wrap;gap:12px}
 .sw{width:44px;height:44px;border-radius:50%;border:none;padding:0;box-shadow:inset 0 0 0 1px rgba(0,0,0,.18)}
 .sw[aria-pressed="true"]{box-shadow:0 0 0 2px #fff,0 0 0 4px var(--gold)}
+.mezcla{margin-top:12px;padding:12px;border:1px dashed var(--gold);border-radius:14px;background:#FFFBF7}
+.mezcla .mz-head{font-size:13px;font-weight:600;color:#5F4E54;margin-bottom:8px}
+.mezcla .mz-head.ok{color:var(--ok)} .mezcla .mz-head.bad{color:var(--bad)}
+.mezcla .mz-sws{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px}
+.mezcla .mz-sws .sw{width:30px;height:30px}
+.mz-row{display:flex;align-items:center;gap:8px;margin-top:6px}
+.mz-row .mz-n{flex:1}
+.mz-row button{width:34px;height:34px;border-radius:50%;border:1px solid #DCCBC4;background:#fff;font-weight:700}
+.mz-row b{min-width:26px;text-align:center}
 .seg{display:grid;grid-template-columns:1fr 1fr;border:1px solid #D9C9C2;border-radius:10px;overflow:hidden}
 .seg button{height:44px;border:none;background:#fff;font-weight:600}
 .seg button[aria-pressed="true"]{background:var(--accent);color:#fff}
@@ -204,6 +213,7 @@ summary{padding:16px 20px;cursor:pointer;font-family:var(--serif);font-size:20px
       <div class="fg">
         <label id="lbl-color">Color de rosas: <span id="colorName"></span></label>
         <div class="swatches" id="swatches" role="group" aria-labelledby="lbl-color"></div>
+        <div class="mezcla" id="mezcla" style="display:none"></div>
       </div>
 
       <div class="fg"><label for="nombre">Nombre</label><input type="text" id="nombre" required></div>
@@ -340,7 +350,23 @@ summary{padding:16px 20px;cursor:pointer;font-family:var(--serif);font-size:20px
   }
 
   // Formulario
-  var F={qty:9,color:'verde',envio:false,precioManual:false,reservaManual:false};
+  var F={qty:9,color:'verde',mezcla:{},envio:false,precioManual:false,reservaManual:false};
+  // Combinado: mezcla = {colorKey: cantidad}. Solo cuenta si suma igual a qty.
+  function mixOk(o){if(o.color!=='combinado'||!o.mezcla)return false;var t=0;for(var k in o.mezcla)t+=+o.mezcla[k]||0;return t===o.qty}
+  function reparto(o){if(mixOk(o)){var r={};for(var k in o.mezcla)if(+o.mezcla[k]>0)r[k]=+o.mezcla[k];return r}var x={};x[o.color]=o.qty;return x}
+  function mixTxt(o){if(!mixOk(o))return '';return ' ('+Object.keys(o.mezcla).filter(function(k){return +o.mezcla[k]>0}).sort(function(a,b){return o.mezcla[b]-o.mezcla[a]}).map(function(k){return o.mezcla[k]+' '+colorDe(k)[0]}).join(', ')+')'}
+  function mixDots(o){if(!mixOk(o))return '<span class="dot" style="background:'+colorDe(o.color)[1]+'"></span>';return Object.keys(o.mezcla).filter(function(k){return +o.mezcla[k]>0}).map(function(k){return '<span class="dot" style="background:'+colorDe(k)[1]+'"></span>'}).join('')}
+  function mixSum(){var t=0;for(var k in F.mezcla)t+=F.mezcla[k];return t}
+  function renderMezcla(){
+    var box=$('mezcla'); if(F.color!=='combinado'){box.style.display='none';box.innerHTML='';return}
+    box.style.display=''; var t=mixSum(), cls=t===F.qty?'ok':(t>F.qty?'bad':'');
+    var h='<div class="mz-head '+cls+'">Combinación: '+t+' de '+F.qty+' rosas asignadas'+(t>F.qty?' (te pasaste)':'')+'</div><div class="mz-sws">';
+    Object.keys(COLORS).forEach(function(k){if(k==='combinado'||k==='otro')return; h+='<button type="button" class="sw" data-mz-add="'+k+'" style="background:'+COLORS[k][1]+'" aria-label="Agregar '+COLORS[k][0]+'" aria-pressed="'+(F.mezcla[k]>0)+'"></button>'});
+    h+='</div>'; var ks=Object.keys(F.mezcla);
+    if(!ks.length) h+='<div class="where">Tocá los colores que lleva el ramo.</div>';
+    ks.forEach(function(k){h+='<div class="mz-row"><span class="dot" style="background:'+COLORS[k][1]+'"></span><span class="mz-n">'+COLORS[k][0]+'</span><button type="button" data-mz-menos="'+k+'" aria-label="Una menos">−</button><b>'+F.mezcla[k]+'</b><button type="button" data-mz-mas="'+k+'" aria-label="Una más">+</button></div>'});
+    box.innerHTML=h;
+  }
   function suggestedReserva(p){return Math.round(p*0.5/500)*500}
   function refreshForm(){
     if(!F.precioManual) $('precio').value=priceFor(F.qty);
@@ -349,6 +375,7 @@ summary{padding:16px 20px;cursor:pointer;font-family:var(--serif);font-size:20px
     $('debe').textContent=money(Math.max(d,0));
     $('colorName').textContent=COLORS[F.color][0];
     Array.prototype.forEach.call($('swatches').children,function(b){b.setAttribute('aria-pressed',String(b.dataset.c===F.color))});
+    renderMezcla();
     $('retira').setAttribute('aria-pressed',String(!F.envio));
     $('envia').setAttribute('aria-pressed',String(F.envio));
   }
@@ -368,6 +395,11 @@ summary{padding:16px 20px;cursor:pointer;font-family:var(--serif);font-size:20px
     $('otro').oninput=function(){var n=parseInt($('otro').value,10); if(n>0){F.qty=n;F.precioManual=false;F.reservaManual=false;refreshForm()}};
     $('precio').oninput=function(){F.precioManual=true;if(!F.reservaManual)$('reserva').value=suggestedReserva(+$('precio').value||0);refreshForm()};
     $('reserva').oninput=function(){F.reservaManual=true;refreshForm()};
+    $('mezcla').onclick=function(e){var b=e.target.closest('button'); if(!b) return; var k;
+      if((k=b.dataset.mzAdd)){ if(F.mezcla[k]>0) delete F.mezcla[k]; else F.mezcla[k]=1; }
+      else if((k=b.dataset.mzMas)){ F.mezcla[k]++; }
+      else if((k=b.dataset.mzMenos)){ F.mezcla[k]--; if(F.mezcla[k]<=0) delete F.mezcla[k]; }
+      refreshForm(); };
     $('retira').onclick=function(){F.envio=false;refreshForm()};
     $('envia').onclick=function(){F.envio=true;refreshForm()};
     $('form').onsubmit=function(e){
@@ -375,10 +407,12 @@ summary{padding:16px 20px;cursor:pointer;font-family:var(--serif);font-size:20px
       var nombre=$('nombre').value.trim(), ent=$('entrega').value;
       if(!ent){$('err').textContent='Falta la fecha de entrega.';return}
       if(!nombre){$('err').textContent='Falta el nombre.';return}
+      if(F.color==='combinado'&&mixSum()!==F.qty){$('err').textContent='La combinación tiene '+mixSum()+' rosas y el pedido '+F.qty+'. Tienen que coincidir.';return}
       $('err').textContent='';
       var data={entrega:ent,nombre:nombre,tel:$('tel').value.trim(),lugar:$('lugar').value.trim(),
         envio:F.envio,qty:F.qty,color:F.color,precio:+$('precio').value||0,pagado:+$('reserva').value||0,costo:F.qty*S.costRose,
-        observaciones:$('obs').value.trim()};
+        observaciones:$('obs').value.trim(),
+        mezcla:F.color==='combinado'?JSON.parse(JSON.stringify(F.mezcla)):null};
       if(editingId){
         ordersRef.child(editingId).update(data);
         exitEdit();
@@ -395,7 +429,7 @@ summary{padding:16px 20px;cursor:pointer;font-family:var(--serif);font-size:20px
 
   function enterEdit(o){
     editingId=o.id;
-    F.qty=o.qty; F.color=o.color; F.envio=!!o.envio; F.precioManual=true; F.reservaManual=true;
+    F.qty=o.qty; F.color=o.color; F.mezcla=o.mezcla?JSON.parse(JSON.stringify(o.mezcla)):{}; F.envio=!!o.envio; F.precioManual=true; F.reservaManual=true;
     $('entrega').value=o.entrega; $('otro').value='';
     $('nombre').value=o.nombre||''; $('tel').value=o.tel||''; $('lugar').value=o.lugar||'';
     $('obs').value=o.observaciones||''; $('precio').value=o.precio; $('reserva').value=o.pagado;
@@ -410,7 +444,7 @@ summary{padding:16px 20px;cursor:pointer;font-family:var(--serif);font-size:20px
   function exitEdit(){
     editingId=null;
     $('nombre').value='';$('tel').value='';$('lugar').value='';$('entrega').value='';$('obs').value='';
-    F.qty=9;F.color='verde';F.envio=false;F.precioManual=false;F.reservaManual=false;
+    F.qty=9;F.color='verde';F.mezcla={};F.envio=false;F.precioManual=false;F.reservaManual=false;
     $('formTitle').textContent='Nuevo pedido';
     $('saveBtn').textContent='Guardar pedido';
     $('cancelEdit').style.display='none';
@@ -498,7 +532,7 @@ summary{padding:16px 20px;cursor:pointer;font-family:var(--serif);font-size:20px
       rows+='<div class="row" data-id="'+esc(o.id)+'">'+
         '<div class="c-fecha"><div class="fecha">'+fmtDate(o.entrega)+'</div><span class="badge '+cls+'">'+txt+'</span></div>'+
         '<div class="c-cliente"><div class="who">'+esc(o.nombre)+'</div><div class="where">'+esc([o.lugar,o.envio?'Envío':'Retira',o.tel].filter(Boolean).join(' · '))+'</div>'+(o.observaciones?'<div class="obs">📝 '+esc(o.observaciones)+'</div>':'')+'<button type="button" class="wa" data-act="wa" aria-label="WhatsApp Business a '+esc(o.nombre)+'"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.48 1.32 5L2 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2m0 1.8a8.1 8.1 0 0 1 8.1 8.11c0 4.47-3.63 8.1-8.1 8.1a8.07 8.07 0 0 1-4.11-1.12l-.29-.17-3.02.79.81-2.94-.19-.3a8.06 8.06 0 0 1-1.24-4.36c0-4.47 3.63-8.11 8.1-8.11m-2.32 3.6c-.19 0-.5.07-.76.36-.26.28-1 .98-1 2.39s1.03 2.77 1.17 2.96c.14.19 2 3.05 4.85 4.28.68.29 1.21.46 1.62.6.68.21 1.3.18 1.79.11.55-.08 1.68-.69 1.92-1.35.24-.67.24-1.24.17-1.36-.07-.12-.26-.19-.55-.33-.28-.14-1.68-.83-1.94-.92-.26-.1-.45-.14-.64.14-.19.28-.73.92-.9 1.11-.16.19-.33.21-.61.07-.28-.14-1.18-.44-2.24-1.39-.83-.74-1.39-1.65-1.55-1.93-.16-.28-.02-.43.12-.57.13-.13.28-.33.42-.5.14-.16.19-.28.28-.47.09-.19.05-.35-.02-.5-.07-.14-.64-1.56-.89-2.14-.23-.56-.47-.48-.64-.49z"/></svg></button></div>'+
-        '<div class="c-rosas"><span class="dot" style="background:'+COLORS[o.color][1]+'"></span>'+o.qty+' · '+COLORS[o.color][0]+'</div>'+
+        '<div class="c-rosas">'+mixDots(o)+o.qty+' · '+colorDe(o.color)[0]+mixTxt(o)+'</div>'+
         '<div class="c-money">'+
           '<div class="c-precio num">'+money(o.precio)+'</div>'+
           '<div class="c-reserva num">'+money(o.pagado)+'</div>'+
@@ -516,11 +550,11 @@ summary{padding:16px 20px;cursor:pointer;font-family:var(--serif);font-size:20px
     $('b-paid').textContent=money(paid);$('b-owed').textContent=money(owed);$('b-total').textContent=money(total);$('b-cost').textContent=money(cost);$('b-profit').textContent=money(profit);
     // Colores
     // Colores: solo lo que falta armar (ni Listo ni Entregado)
-    var ct={}, ctTot=0; inMes.forEach(function(o){if(o.estado==='Listo'||o.estado==='Entregado')return; ct[o.color]=(ct[o.color]||0)+o.qty; ctTot+=o.qty});
+    var ct={}, ctTot=0; inMes.forEach(function(o){if(o.estado==='Listo'||o.estado==='Entregado')return; var rp=reparto(o); for(var k in rp) ct[k]=(ct[k]||0)+rp[k]; ctTot+=o.qty});
     var ck=Object.keys(ct).sort(function(a,b){return ct[b]-ct[a]}), mx=ck.length?ct[ck[0]]:1;
     $('colors').innerHTML=ck.length?ck.map(function(k){return '<div class="cbar"><div><span class="dot" style="background:'+colorDe(k)[1]+'"></span>'+colorDe(k)[0]+'</div><div class="t"><div style="width:'+Math.round(ct[k]/mx*100)+'%"></div></div><b style="text-align:right">'+ct[k]+'</b></div>'}).join('')+'<div class="line" style="margin-top:12px"><span>Total a armar</span><b>'+ctTot+' rosas</b></div>':'<div class="where" style="margin-top:12px">No hay rosas para armar en este momento.</div>';
     // Balance: rosas por color del mes elegido (todos los pedidos de ese mes)
-    var pm={}; S.orders.forEach(function(o){var m=o.entrega.slice(0,7); pm[m]=pm[m]||{tot:0,c:{}}; pm[m].c[o.color]=(pm[m].c[o.color]||0)+o.qty; pm[m].tot+=o.qty});
+    var pm={}; S.orders.forEach(function(o){var m=o.entrega.slice(0,7); pm[m]=pm[m]||{tot:0,c:{}}; var rp=reparto(o); for(var k in rp) pm[m].c[k]=(pm[m].c[k]||0)+rp[k]; pm[m].tot+=o.qty});
     var mk=Object.keys(pm).sort();
     if(mes!==mesPrev){ if(mes!=='todos') mesColor=mes; mesPrev=mes; }
     if(!pm[mesColor]){ var hoy=new Date(), cur=hoy.getFullYear()+'-'+String(hoy.getMonth()+1).padStart(2,'0'); mesColor=pm[cur]?cur:(mk.filter(function(x){return x>cur})[0]||mk[mk.length-1]||cur); }
@@ -587,7 +621,7 @@ summary{padding:16px 20px;cursor:pointer;font-family:var(--serif);font-size:20px
   $('csv').onclick=function(){
     var head=['Fecha pedido','Fecha entrega','Nombre','Teléfono','De dónde es','Entrega / Retira','Cantidad rosas','Color','Seña ($)','Precio final ($)','Falta cobrar ($)','Estado','Observaciones'];
     var lines=[head].concat(S.orders.slice().sort(function(a,b){return a.entrega<b.entrega?-1:1}).map(function(o){
-      return [o.creado,o.entrega,o.nombre,o.tel,o.lugar,o.envio?'Envío':'Retira',o.qty,COLORS[o.color][0],o.pagado,o.precio,debe(o),o.estado,o.observaciones||''];
+      return [o.creado,o.entrega,o.nombre,o.tel,o.lugar,o.envio?'Envío':'Retira',o.qty,colorDe(o.color)[0]+mixTxt(o),o.pagado,o.precio,debe(o),o.estado,o.observaciones||''];
     }));
     var csv='﻿'+lines.map(function(r){return r.map(function(c){return '"'+String(c==null?'':c).replace(/"/g,'""')+'"'}).join(';')}).join('\r\n');
     var a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'})); a.download='pedidos-reina-dabi.csv'; a.click(); setTimeout(function(){URL.revokeObjectURL(a.href)},1000);
